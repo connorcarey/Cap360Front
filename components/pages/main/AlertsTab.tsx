@@ -30,7 +30,7 @@ export const AlertsTab = () => {
                     onPress={() => setActiveTab('alerts')}
                 >
                     <ButtonText className={`text-lg font-medium ${activeTab === 'alerts' ? 'text-primary-600' : 'text-typography-500'}`}>
-                        Alerts
+                        Requests
                     </ButtonText>
                 </Button>
             </View>
@@ -40,7 +40,7 @@ export const AlertsTab = () => {
                 {activeTab === 'general' ? (
                     <Text className="text-lg text-typography-800">General content goes here</Text>
                 ) : (
-                    <Text className="text-lg text-typography-800">Alerts content goes here</Text>
+                    <Text className="text-lg text-typography-800">Requests content goes here</Text>
                 )}
             </View>
         </TabLayout>
