@@ -4,7 +4,7 @@ import { useFocusEffect } from "@react-navigation/native"
 import { TabLayout } from "@/components/pages/main/TabLayout"
 import { Button, ButtonText } from "@/components/ui/button"
 import { Icon, CheckIcon, CloseIcon, RefreshCwIcon } from "@/components/ui/icon"
-import { useBakraUser } from "@/hooks/useBakraUser"
+import { useCurrentUserData } from "@/hooks/useCurrentUserData"
 import { useMultipleMemberDetails } from "@/hooks/useMemberDetails"
 import { resolveRequestRequestResolveRequestRequestIdPost } from "@/client"
 import { useQueryClient } from "@tanstack/react-query"
@@ -35,8 +35,8 @@ interface Request {
     description: string | null;
 }
 
-// BakraUser interface - contains both requests and transactions
-interface BakraUser {
+// CurrentUserData interface - contains both requests and transactions
+interface CurrentUserData {
     requests?: Record<string, Request>;
     transactions?: Record<string, Transaction>;
     [key: string]: any; // Allow any additional properties
@@ -82,14 +82,14 @@ export const AlertsTab = () => {
     const [resolvedRequests, setResolvedRequests] = useState<Set<string>>(new Set())
     const [resolvingRequest, setResolvingRequest] = useState<string | null>(null)
     const queryClient = useQueryClient()
-    const { data: bakraUser, isLoading: userLoading, error: userError, refetch: refetchBakraUser } = useBakraUser()
+    const { data: currentUserData, isLoading: userLoading, error: userError, refetch: refetchCurrentUserData } = useCurrentUserData()
     
-    // Extract requests from bakra user data - requests is an object, not an array
+    // Extract requests from current user data - requests is an object, not an array
     const requests: Request[] = useMemo(() => {
-        if (!bakraUser) return []
+        if (!currentUserData) return []
         
-        const user = bakraUser as BakraUser
-        console.log('Processing bakra user data:', user)
+        const user = currentUserData as CurrentUserData
+        console.log('Processing current user data:', user)
         
         // Check if requests exists and is an object
         if (user.requests && typeof user.requests === 'object') {
@@ -101,14 +101,14 @@ export const AlertsTab = () => {
         
         console.log('No requests found in user data')
         return []
-    }, [bakraUser])
+    }, [currentUserData])
 
-    // Extract transactions from bakra user data - transactions is an object, not an array
+    // Extract transactions from current user data - transactions is an object, not an array
     const transactions: Transaction[] = useMemo(() => {
-        if (!bakraUser) return []
+        if (!currentUserData) return []
         
-        const user = bakraUser as BakraUser
-        console.log('Processing bakra user data for transactions:', user)
+        const user = currentUserData as CurrentUserData
+        console.log('Processing current user data for transactions:', user)
         
         // Check if transactions exists and is an object
         if (user.transactions && typeof user.transactions === 'object') {
@@ -120,7 +120,7 @@ export const AlertsTab = () => {
         
         console.log('No transactions found in user data')
         return []
-    }, [bakraUser])
+    }, [currentUserData])
     
     // Sort requests by date (newest first) and filter out resolved ones
     const sortedRequests = useMemo(() => {
@@ -166,9 +166,9 @@ export const AlertsTab = () => {
             // Add to resolved requests to remove from UI immediately
             setResolvedRequests(prev => new Set([...prev, requestId]))
             
-            // Force invalidate and refetch all bakra user data
-            await queryClient.invalidateQueries({ queryKey: ['bakraUser'] })
-            await refetchBakraUser()
+            // Force invalidate and refetch all current user data
+            await queryClient.invalidateQueries({ queryKey: ['currentUserData'] })
+            await refetchCurrentUserData()
             
         } catch (error) {
             console.error('Failed to resolve request:', error)
@@ -182,11 +182,11 @@ export const AlertsTab = () => {
     useFocusEffect(
         React.useCallback(() => {
             // Refetch data when the tab becomes active
-            refetchBakraUser()
+            refetchCurrentUserData()
             if (memberIds.length > 0) {
                 refetchMembers()
             }
-        }, [refetchBakraUser, refetchMembers, memberIds.length])
+        }, [refetchCurrentUserData, refetchMembers, memberIds.length])
     )
     
     // Auto-refresh every 30 seconds when on alerts tab
@@ -195,7 +195,7 @@ export const AlertsTab = () => {
             console.log('Setting up auto-refresh interval for alerts tab')
             const interval = setInterval(() => {
                 console.log('Auto-refreshing data...')
-                refetchBakraUser()
+                refetchCurrentUserData()
                 if (memberIds.length > 0) {
                     refetchMembers()
                 }

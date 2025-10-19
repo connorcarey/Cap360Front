@@ -1,7 +1,7 @@
 import { View, Text, ScrollView, Image, Pressable } from "react-native"
 import React, { useState } from "react"
 import { TabLayout } from "@/components/pages/main/TabLayout"
-import { useBakraUser } from "@/hooks/useBakraUser"
+import { useCurrentUserData } from "@/hooks/useCurrentUserData"
 import { useFamilyMembers, FamilyMember } from "@/hooks/useFamilyMembers"
 import { useIndebtedTo } from "@/hooks/useMemberDetails"
 import { ErrorWithReload } from "@/components/ui/error-with-reload"
@@ -11,8 +11,8 @@ import { Icon, MoneyIcon, CheckIcon, CloseIcon } from "@/components/ui/icon"
 import { resolveDebtRequestResolveDebtFromIdToIdPost } from "@/client"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
-// Define the BakraUser type based on the API response
-interface BakraUser {
+// Define the CurrentUserData type based on the API response
+interface CurrentUserData {
     id: string;
     family_id: string;
     // Add other properties as needed based on actual API response
@@ -62,9 +62,9 @@ export const GroupTab = () => {
     const [isProcessing, setIsProcessing] = useState(false)
     const queryClient = useQueryClient()
     
-    const { data: bakraUser, isLoading: userLoading, error: userError, refetch: refetchBakraUser } = useBakraUser()
-    const { data: familyMembers, isLoading: familyLoading, error: familyError, refetch: refetchFamilyMembers } = useFamilyMembers((bakraUser as BakraUser)?.family_id)
-    const { data: indebtedData, isLoading: indebtedLoading, error: indebtedError, refetch: refetchIndebted } = useIndebtedTo((bakraUser as BakraUser)?.id)
+    const { data: currentUserData, isLoading: userLoading, error: userError, refetch: refetchCurrentUserData } = useCurrentUserData()
+    const { data: familyMembers, isLoading: familyLoading, error: familyError, refetch: refetchFamilyMembers } = useFamilyMembers((currentUserData as CurrentUserData)?.family_id)
+    const { data: indebtedData, isLoading: indebtedLoading, error: indebtedError, refetch: refetchIndebted } = useIndebtedTo((currentUserData as CurrentUserData)?.id)
 
     // Mutation for resolving debt
     const resolveDebtMutation = useMutation({
@@ -91,7 +91,7 @@ export const GroupTab = () => {
             // Refetch specific data
             const [indebtedResult, userResult, familyResult] = await Promise.all([
                 refetchIndebted(),
-                refetchBakraUser(),
+                refetchCurrentUserData(),
                 refetchFamilyMembers()
             ])
             
@@ -144,7 +144,7 @@ export const GroupTab = () => {
             return
         }
         
-        const currentUserId = (bakraUser as BakraUser)?.id
+        const currentUserId = (currentUserData as CurrentUserData)?.id
         if (!currentUserId) {
             setValidationError("Unable to identify current user")
             return
@@ -164,7 +164,7 @@ export const GroupTab = () => {
         setIsReloading(true)
         try {
             await Promise.all([
-                refetchBakraUser(),
+                refetchCurrentUserData(),
                 refetchFamilyMembers(),
                 refetchIndebted()
             ])
@@ -203,7 +203,7 @@ export const GroupTab = () => {
     }
 
     const allMembers = familyMembers as FamilyMember[] || []
-    const currentUserId = (bakraUser as BakraUser)?.id
+    const currentUserId = (currentUserData as CurrentUserData)?.id
     
     // Filter out the current user from the members list
     const members = allMembers.filter((member: FamilyMember) => member.id !== currentUserId)

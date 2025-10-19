@@ -9,6 +9,7 @@ import { Home } from '@/components/pages/main/Home';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { CurrentUserProvider } from '@/hooks/useCurrentUser';
 
 const queryClient = new QueryClient();
 
@@ -17,12 +18,14 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <GluestackUIProvider mode="light">
-        <NavigationContainer>
-          <Stack.Navigator initialRouteName="Home">
-            <Stack.Screen name="Login" component={Login} options={{ headerShown: false }}/>
-            <Stack.Screen name="Home" component={Home} options={{ headerShown: false }}/>
-          </Stack.Navigator>
-        </NavigationContainer>
+        <CurrentUserProvider>
+          <NavigationContainer>
+            <Stack.Navigator initialRouteName="Login">
+              <Stack.Screen name="Login" component={Login} options={{ headerShown: false }}/>
+              <Stack.Screen name="Home" component={Home} options={{ headerShown: false }}/>
+            </Stack.Navigator>
+          </NavigationContainer>
+        </CurrentUserProvider>
       </GluestackUIProvider>
     </QueryClientProvider>
   );

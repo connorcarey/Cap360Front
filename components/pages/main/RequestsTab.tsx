@@ -17,7 +17,7 @@ import {
     SelectDragIndicatorWrapper,
     SelectItem,
   } from '@/components/ui/select';
-import { useBakraUser } from "@/hooks/useBakraUser"
+import { useCurrentUserData } from "@/hooks/useCurrentUserData"
 import { useFamilyMembers, FamilyMember } from "@/hooks/useFamilyMembers"
 import { requestMoneyRequestFromIdRequestMoneyPost } from "@/client"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -25,7 +25,7 @@ import * as Updates from 'expo-updates'
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 // Define the BakraUser type based on the API response
-interface BakraUser {
+interface CurrentUserData {
     id: string;
     family_id: string;
     // Add other properties as needed based on actual API response
@@ -76,8 +76,8 @@ export const RequestsTab = () => {
     const [amount, setAmount] = useState<string>("")
     const [validationError, setValidationError] = useState<string>("")
     const [successMessage, setSuccessMessage] = useState<string>("")
-    const { data: bakraUser, isLoading: userLoading, error: userError } = useBakraUser()
-    const { data: familyMembers, isLoading: familyLoading, error: familyError } = useFamilyMembers((bakraUser as BakraUser)?.family_id)
+    const { data: currentUserData, isLoading: userLoading, error: userError } = useCurrentUserData()
+    const { data: familyMembers, isLoading: familyLoading, error: familyError } = useFamilyMembers((currentUserData as CurrentUserData)?.family_id)
     const moneyRequestMutation = useMoneyRequest()
 
     // Validation function for amount
@@ -108,13 +108,13 @@ export const RequestsTab = () => {
         }
         
         // Check if user data is available
-        if (!(bakraUser as any)?.id) {
+        if (!(currentUserData as any)?.id) {
             setValidationError("User data not available. Please try again.")
             return
         }
         
         moneyRequestMutation.mutate({
-            fromId: (bakraUser as BakraUser).id,
+            fromId: (currentUserData as CurrentUserData).id,
             toId: selectedMemberId,
             amount: parseFloat(amount)
         }, {
@@ -253,7 +253,7 @@ export const RequestsTab = () => {
                                     <SelectDragIndicator />
                                 </SelectDragIndicatorWrapper>
                                 {familyMembers && Array.isArray(familyMembers) && familyMembers
-                                    .filter((member: FamilyMember) => member.id !== (bakraUser as BakraUser)?.id)
+                                    .filter((member: FamilyMember) => member.id !== (currentUserData as CurrentUserData)?.id)
                                     .map((member: FamilyMember, index: number) => {
                                         // Use member's name directly
                                         const firstName = member.first_name || member.firstName || member.name || 'Unknown'

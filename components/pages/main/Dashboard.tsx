@@ -1,7 +1,9 @@
 import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native"
 import { TabLayout } from "@/components/pages/main/TabLayout"
 import { Avatar, AvatarImage, AvatarFallbackText } from "@/components/ui/avatar"
-import { useBakraUser } from "@/hooks/useBakraUser"
+import { useCurrentUserData } from "@/hooks/useCurrentUserData"
+import { useCurrentUser } from "@/hooks/useCurrentUser"
+import { useNavigation } from '@react-navigation/native'
 import * as Updates from 'expo-updates'
 import { ErrorWithReload } from "@/components/ui/error-with-reload"
 // Import for restart functionality
@@ -13,7 +15,7 @@ try {
 }
 
 // Define types for the dashboard data
-interface BakraUser {
+interface CurrentUserData {
     id: string;
     first_name: string;
     last_name: string;
@@ -21,23 +23,51 @@ interface BakraUser {
     current_debt?: number;
 }
 
-// Dashboard is always for Bakra, so always use Aiyaz image
+// Dashboard shows current user's data
+
+// Function to get the appropriate profile image based on member name
+const getMemberImage = (firstName?: string) => {
+    if (!firstName) return require('@/assets/images/default.jpg')
+    
+    const name = firstName.toLowerCase()
+    
+    switch (name) {
+        case 'chinmay':
+            return require('@/assets/images/chinmay.png')
+        case 'connor':
+            return require('@/assets/images/connor.png')
+        case 'aiyaz':
+            return require('@/assets/images/aiyaz.png')
+        default:
+            return require('@/assets/images/default.jpg')
+    }
+}
 
 export const Dashboard = () => {
-    const { data: bakraUser, isLoading: userLoading, error: userError } = useBakraUser()
+    const { data: currentUserData, isLoading: userLoading, error: userError } = useCurrentUserData()
+    const { logout } = useCurrentUser()
+    const navigation = useNavigation()
 
-    // Handle profile icon click to restart the app
+    // Handle profile icon click to show options
     const handleProfileClick = () => {
         Alert.alert(
-            "Restart App",
-            "Are you sure you want to restart the app?",
+            "Options",
+            "What would you like to do?",
             [
                 {
                     text: "Cancel",
                     style: "cancel"
                 },
                 {
-                    text: "Restart",
+                    text: "Logout",
+                    style: "destructive",
+                    onPress: () => {
+                        logout();
+                        navigation.navigate('Login' as never);
+                    }
+                },
+                {
+                    text: "Restart App",
                     style: "destructive",
                     onPress: () => {
                         try {
@@ -112,7 +142,7 @@ export const Dashboard = () => {
         )
     }
 
-    const user = bakraUser as BakraUser
+    const user = currentUserData as CurrentUserData
     const currentBalance = user?.balance || 0
     const totalDebt = user?.current_debt || 0
     const netWorth = currentBalance - totalDebt
@@ -127,7 +157,7 @@ export const Dashboard = () => {
                             <AvatarFallbackText className="text-2xl font-bold">
                                 {user?.first_name?.charAt(0)}{user?.last_name?.charAt(0)}
                             </AvatarFallbackText>
-                            <AvatarImage source={require('@/assets/images/aiyaz.png')} />
+                            <AvatarImage source={getMemberImage(user?.first_name)} />
                         </Avatar>
                     </TouchableOpacity>
                     <Text className="text-2xl font-bold text-typography-800">
