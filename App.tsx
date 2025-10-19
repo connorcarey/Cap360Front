@@ -8,18 +8,22 @@ import { Login } from '@/components/pages/special/Login';
 import { Home } from '@/components/pages/main/Home';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
 
 const Stack = createStackNavigator();
 export default function App() {
   return (
-    <GluestackUIProvider mode="light">
-      <NavigationContainer>
+    <QueryClientProvider client={queryClient}>
+      <GluestackUIProvider mode="light">
+        <NavigationContainer>
           <Stack.Navigator initialRouteName="Home">
             <Stack.Screen name="Login" component={Login} options={{ headerShown: false }}/>
             <Stack.Screen name="Home" component={Home} options={{ headerShown: false }}/>
           </Stack.Navigator>
-      </NavigationContainer>
-    </GluestackUIProvider>
+        </NavigationContainer>
+      </GluestackUIProvider>
+    </QueryClientProvider>
   );
 }
