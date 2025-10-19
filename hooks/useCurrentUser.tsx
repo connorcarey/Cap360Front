@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 export interface CurrentUser {
     id: string;
@@ -20,8 +21,12 @@ const CurrentUserContext = createContext<CurrentUserContextType | undefined>(und
 
 export const CurrentUserProvider = ({ children }: { children: ReactNode }) => {
     const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+    const queryClient = useQueryClient();
 
     const logout = () => {
+        // Clear all cached data
+        queryClient.clear();
+        // Reset user state
         setCurrentUser(null);
     };
 
