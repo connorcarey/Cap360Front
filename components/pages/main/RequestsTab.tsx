@@ -119,7 +119,7 @@ export const RequestsTab = () => {
         }
         
         // Check if user data is available
-        if (!bakraUser?.id) {
+        if (!(bakraUser as any)?.id) {
             setValidationError("User data not available. Please try again.")
             return
         }
@@ -162,17 +162,7 @@ export const RequestsTab = () => {
     return (
         <View className="flex-1 flex-col">
             <Avatar className="absolute z-10 top-1/4 left-1/2 h-[200] w-[200] mt-[-100] ml-[-100] ">
-                <AvatarFallbackText>
-                    {selectedMemberId && familyMembers 
-                        ? (() => {
-                            const selectedMember = familyMembers.find(member => member.id === selectedMemberId);
-                            return selectedMember 
-                                ? `${selectedMember.first_name.charAt(0)}${selectedMember.last_name.charAt(0)}`
-                                : "X";
-                          })()
-                        : "X"
-                    }
-                </AvatarFallbackText>
+                <AvatarFallbackText>Recipient</AvatarFallbackText>
                 <AvatarImage source={require('@/assets/images/placeholder-logo.png')} />
             </Avatar>
             <View className="h-1/4 bg-red-500"></View>
