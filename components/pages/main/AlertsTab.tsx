@@ -191,7 +191,7 @@ export const AlertsTab = () => {
     
     // Auto-refresh every 30 seconds when on alerts tab
     useEffect(() => {
-        if (activeTab === 'alerts') {
+        if (activeTab === 'alerts' || activeTab == 'general') {
             console.log('Setting up auto-refresh interval for alerts tab')
             const interval = setInterval(() => {
                 console.log('Auto-refreshing data...')
